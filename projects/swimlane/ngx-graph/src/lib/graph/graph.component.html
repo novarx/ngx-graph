@@ -6,6 +6,7 @@
   (legendLabelActivate)="onActivate($event)"
   (legendLabelDeactivate)="onDeactivate($event)"
   mouseWheel
+  [mouseWheelEnabled]="enableZoom || enableTrackpadSupport"
   (mouseWheelUp)="onZoom($event, 'in')"
   (mouseWheelDown)="onZoom($event, 'out')"
 >
