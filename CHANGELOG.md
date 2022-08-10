@@ -1,5 +1,23 @@
 # Changelog
 
+## 8.0.2
+
+- Chore: Add angular 14 as a peer dependency
+
+## 8.0.1
+
+- Chore: Add rxjs 7 as a peer dependency
+- Chore: Bump msagl tp 0.0.51 and update msagl layout
+
+## 8.0.0
+
+- Chore; Upgrade to angular 13
+
+## 8.0.0-rc.1
+
+- Breaking: Remove dependency on ngx-charts (removes the `legend` input) (#363)
+- Chore: Update angular to 11
+
 ## 7.2.0
 
 - Chore: Update angular to 10.1

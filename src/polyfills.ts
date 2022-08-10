@@ -34,22 +34,12 @@
 // import 'core-js/es6/weak-map';
 // import 'core-js/es6/set';
 
-/** IE10 and IE11 requires the following for NgClass support on SVG elements */
-// import 'classlist.js';  // Run `npm install --save classlist.js`.
-
 /** IE10 and IE11 requires the following for the Reflect API. */
 // import 'core-js/es6/reflect';
 
 /* Evergreen browsers require these. */
 // Used for reflect-metadata in JIT. If you use AOT (and only Angular decorators), you can remove.
 import 'core-js/es7/reflect';
-
-/*
- * Web Animations `@angular/platform-browser/animations`
- * Only required if AnimationBuilder is used within the application and using IE/Edge or Safari.
- * Standard animation support in Angular DOES NOT require any polyfills (as of Angular 6.0).
- */
-// import 'web-animations-js';  // Run `npm install --save web-animations-js`.
 
 /**
  * By default, zone.js will patch all possible macroTask and DomEvents
@@ -69,19 +59,16 @@ import 'core-js/es7/reflect';
 /***************************************************************************************************
  * Zone JS is required by default for Angular itself.
  */
-import 'zone.js/dist/zone'; // Included with Angular CLI.
+import 'zone.js'; // Included with Angular CLI.
 
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
-// Used for browsers with partially native support of Custom Elements
-import '@webcomponents/custom-elements/src/native-shim';
-
-// Used for browsers without a native support of Custom Elements
-import '@webcomponents/custom-elements/custom-elements.min';
-
+import '@ungap/custom-elements';
 import '@ungap/global-this';
 
 window['global'] = globalThis as any;
 window['process'] = window['process'] || require('process/browser');
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 window['Buffer'] = window['Buffer'] || require('buffer').Buffer;

@@ -8,7 +8,7 @@ import * as d3Force from 'd3-force';
 import * as d3Timer from 'd3-timer';
 import { Edge } from '../../models/edge.model';
 import { Observable, Subject } from 'rxjs';
-import { ViewDimensions } from '@swimlane/ngx-charts';
+import { ViewDimensions } from '../../utils/view-dimensions.helper';
 
 export interface ColaForceDirectedSettings {
   force?: ColaLayout & ID3StyleLayoutAdaptor;
@@ -39,8 +39,7 @@ export class ColaForceDirectedLayout implements Layout {
       .avoidOverlaps(true),
     viewDimensions: {
       width: 600,
-      height: 600,
-      xOffset: 0
+      height: 600
     }
   };
   settings: ColaForceDirectedSettings = {};
@@ -202,22 +201,20 @@ export class ColaForceDirectedLayout implements Layout {
         })
       );
 
-    this.outputGraph.clusters = internalGraph.groups.map(
-      (group, index): ClusterNode => {
-        const inputGroup = this.inputGraph.clusters[index];
-        return {
-          ...inputGroup,
-          dimension: {
-            width: group.bounds ? group.bounds.width() : 20,
-            height: group.bounds ? group.bounds.height() : 20
-          },
-          position: {
-            x: group.bounds ? group.bounds.x + group.bounds.width() / 2 : 0,
-            y: group.bounds ? group.bounds.y + group.bounds.height() / 2 : 0
-          }
-        };
-      }
-    );
+    this.outputGraph.clusters = internalGraph.groups.map((group, index): ClusterNode => {
+      const inputGroup = this.inputGraph.clusters[index];
+      return {
+        ...inputGroup,
+        dimension: {
+          width: group.bounds ? group.bounds.width() : 20,
+          height: group.bounds ? group.bounds.height() : 20
+        },
+        position: {
+          x: group.bounds ? group.bounds.x + group.bounds.width() / 2 : 0,
+          y: group.bounds ? group.bounds.y + group.bounds.height() / 2 : 0
+        }
+      };
+    });
     this.outputGraph.edgeLabels = this.outputGraph.edges;
     return this.outputGraph;
   }
