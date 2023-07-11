@@ -31,7 +31,7 @@ import { identity, scale, smoothMatrix, toSVG, transform, translate } from 'tran
 import { Layout } from '../models/layout.model';
 import { LayoutService } from './layouts/layout.service';
 import { Edge } from '../models/edge.model';
-import { Node, ClusterNode } from '../models/node.model';
+import { Node, ClusterNode, CompoundNode } from '../models/node.model';
 import { Graph } from '../models/graph.model';
 import { id } from '../utils/id';
 import { PanningAxis } from '../enums/panning.enum';
@@ -68,6 +68,7 @@ export interface Matrix {
 export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() nodes: Node[] = [];
   @Input() clusters: ClusterNode[] = [];
+  @Input() compoundNodes: CompoundNode[] = [];
   @Input() links: Edge[] = [];
   @Input() activeEntries: any[] = [];
   @Input() curve: any;
@@ -103,6 +104,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   @Input() scheme: any = 'cool';
   @Input() customColors: any;
   @Input() animations: boolean = true;
+  @Input() deferDisplayUntilPosition: boolean = false;
   @Output() select = new EventEmitter();
 
   @Output() activate: EventEmitter<any> = new EventEmitter();
@@ -138,6 +140,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   _oldLinks: Edge[] = [];
   oldNodes: Set<string> = new Set();
   oldClusters: Set<string> = new Set();
+  oldCompoundNodes: Set<string> = new Set();
   transformationMatrix: Matrix = identity();
   _touchLastX = null;
   _touchLastY = null;
@@ -251,7 +254,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
   ngOnChanges(changes: SimpleChanges): void {
     this.basicUpdate();
 
-    const { layout, layoutSettings, nodes, clusters, links } = changes;
+    const { layout, layoutSettings, nodes, clusters, links, compoundNodes } = changes;
     this.setLayout(this.layout);
     if (layoutSettings) {
       this.setLayoutSettings(this.layoutSettings);
@@ -366,6 +369,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
           x: 0,
           y: 0
         };
+        if (this.deferDisplayUntilPosition) {
+          n.hidden = true;
+        }
       }
 
       n.data = n.data ? n.data : {};
@@ -375,6 +381,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     this.graph = {
       nodes: this.nodes.length > 0 ? [...this.nodes].map(initializeNode) : [],
       clusters: this.clusters && this.clusters.length > 0 ? [...this.clusters].map(initializeNode) : [],
+      compoundNodes:
+        this.compoundNodes && this.compoundNodes.length > 0 ? [...this.compoundNodes].map(initializeNode) : [],
       edges:
         this.links.length > 0
           ? [...this.links].map(e => {
@@ -412,7 +420,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
       })
     );
 
-    if (this.graph.nodes.length === 0) {
+    if (this.graph.nodes.length === 0 && this.graph.compoundNodes?.length === 0) {
       return;
     }
 
@@ -431,10 +439,14 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         n.data = {};
       }
       n.data.color = this.colors.getColor(this.groupResultsBy(n));
+      if (this.deferDisplayUntilPosition) {
+        n.hidden = false;
+      }
       oldNodes.add(n.id);
     });
 
     const oldClusters: Set<string> = new Set();
+    const oldCompoundNodes: Set<string> = new Set();
 
     (this.graph.clusters || []).map(n => {
       n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${
@@ -444,13 +456,31 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
         n.data = {};
       }
       n.data.color = this.colors.getColor(this.groupResultsBy(n));
+      if (this.deferDisplayUntilPosition) {
+        n.hidden = false;
+      }
       oldClusters.add(n.id);
+    });
+
+    (this.graph.compoundNodes || []).map(n => {
+      n.transform = `translate(${n.position.x - n.dimension.width / 2 || 0}, ${
+        n.position.y - n.dimension.height / 2 || 0
+      })`;
+      if (!n.data) {
+        n.data = {};
+      }
+      n.data.color = this.colors.getColor(this.groupResultsBy(n));
+      if (this.deferDisplayUntilPosition) {
+        n.hidden = false;
+      }
+      oldCompoundNodes.add(n.id);
     });
 
     // Prevent animations on new nodes
     setTimeout(() => {
       this.oldNodes = oldNodes;
       this.oldClusters = oldClusters;
+      this.oldCompoundNodes = oldCompoundNodes;
     }, 500);
 
     // Update the labels to the new positions
@@ -1145,6 +1175,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy, AfterViewIn
     }
 
     this.panTo(node.position.x, node.position.y);
+  }
+
+  getCompoundNodeChildren(ids: Array<string>) {
+    return this.nodes.filter(node => ids.includes(node.id));
   }
 
   private panWithConstraints(key: string, event: MouseEvent) {
