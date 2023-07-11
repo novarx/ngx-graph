@@ -25,26 +25,22 @@ describe('NgxGraphOrgTreeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('mouseWheelDirective', () => {
-    [
-      [false, false, false],
-      [false, true, true],
-      [true, false, true],
-      [true, true, true]
-    ].forEach(([enableZoom, enableTrackpadSupport, shouldBeAEnabled]) => {
-      it(`mouseWheelEnabled is ${shouldBeAEnabled}, 
+  [
+    [false, false, false],
+    [false, true, true],
+    [true, false, true],
+    [true, true, true]
+  ].forEach(([enableZoom, enableTrackpadSupport, shouldBeAEnabled]) => {
+    it(`mouseWheelEnabled is ${shouldBeAEnabled}, 
           given enableZoom is ${enableZoom} 
           and enableTrackpadSupport is ${enableTrackpadSupport}`, () => {
-        component.enableZoom = enableZoom;
-        component.enableTrackpadSupport = enableTrackpadSupport;
+      component.enableZoom = enableZoom;
+      component.enableTrackpadSupport = enableTrackpadSupport;
 
-        fixture.detectChanges();
+      fixture.detectChanges();
 
-        const actual = fixture.debugElement.query(By.css('[mouseWheel]'));
-        expect(actual.nativeElement.getAttribute('ng-reflect-mouse-wheel-enabled')).toEqual(
-          shouldBeAEnabled.toString()
-        );
-      });
+      const actual = fixture.debugElement.query(By.css('[mouseWheel]'));
+      expect(actual.nativeElement.getAttribute('ng-reflect-mouse-wheel-enabled')).toEqual(shouldBeAEnabled.toString());
     });
   });
 });
